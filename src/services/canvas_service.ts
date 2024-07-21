@@ -1,78 +1,113 @@
 const { createCanvas } = require('canvas');
-const fs = require('fs');
+const fs = require('fs').promises;
 
 export class CaptchaService {
-    private captchaService: CaptchaService = new CaptchaService();
-
-    constructor() {
-        this.
-     }
-
-    async generateImage() {
+    static async generateImage(fileName: string, text: string) {
         const width = 500;
         const height = 150;
+        const fontSize = 64; // Adjust font size if necessary
 
         const canvas = createCanvas(width, height);
         const ctx = canvas.getContext('2d');
 
+        // Fill background
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, width, height);
 
-        ctx.font = '64px sans-serif';
-        ctx.fillStyle = '#000000';
+        // Draw text with random colors
+        ctx.font = `${fontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
-        const text = 'ACG369CF';
-        ctx.fillText(text, width / 2, height / 2);
+        // Calculate spacing and position
+        const textLength = text.length;
+        const textSpacing = width / (textLength + 1);
+        const baseY = height / 2;
 
-        ctx.strokeStyle = 'black';
+        for (let i = 0; i < textLength; i++) {
+            const letter = text[i];
+            const x = (i + 1) * textSpacing; // Position each letter
+            const y = baseY;
+
+            // Set random color for each letter
+            ctx.fillStyle = CaptchaService.getRandomColor();
+
+            ctx.fillText(letter, x, y);
+        }
+
+        // Draw horizontal lines with random colors
+        const horizontalLineColors = [
+            CaptchaService.getRandomColor(),
+            CaptchaService.getRandomColor(),
+            CaptchaService.getRandomColor(),
+            CaptchaService.getRandomColor()
+        ];
+
         ctx.lineWidth = 5;
 
-        const textWidth = ctx.measureText(text).width;
-        const textHeight = 48;
+        // Draw horizontal lines
+        const horizontalPositions = [
+            height / 2.5,
+            height / 2.1,
+            height / 1.8,
+            height / 1.6
+        ];
 
-        ctx.beginPath();
-        ctx.moveTo(0, height / 2);
-        ctx.lineTo(width, height / 2);
-        ctx.stroke();
+        horizontalPositions.forEach((pos, index) => {
+            ctx.strokeStyle = horizontalLineColors[index % horizontalLineColors.length];
+            ctx.beginPath();
+            ctx.moveTo(0, pos);
+            ctx.lineTo(width, pos);
+            ctx.stroke();
+        });
 
-        ctx.beginPath();
-        ctx.moveTo(0, height / 2.2);
-        ctx.lineTo(width, height / 2.2);
-        ctx.stroke();
+        // Draw vertical lines with random colors
+        const verticalLineColors = Array.from({ length: 10 }, () => CaptchaService.getRandomColor());
+        const verticalSpacing = width / (verticalLineColors.length + 1);
 
-        ctx.beginPath();
-        ctx.moveTo(0, height / 2.4);
-        ctx.lineTo(width, height / 2.4);
-        ctx.stroke();
+        verticalLineColors.forEach((color, index) => {
+            const x = (index + 1) * verticalSpacing;
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        });
 
-        ctx.beginPath();
-        ctx.moveTo(0, height / 1.8);
-        ctx.lineTo(width, height / 1.8);
-        ctx.stroke();
+        // Draw circles with only borders
+        const circleCount = 7;
+        const borderWidth = 3; // Adjust border width if needed
+        for (let i = 0; i < circleCount; i++) {
+            const circleColor = CaptchaService.getRandomColor();
+            const radius = Math.random() * 30 + 10; // Radius between 10 and 40
+            const x = Math.random() * (width - 2 * radius) + radius; // Random x within canvas
+            const y = Math.random() * (height - 2 * radius) + radius; // Random y within canvas
 
-        ctx.beginPath();
-        ctx.moveTo(0, height / 1.6);
-        ctx.lineTo(width, height / 1.6);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(width / 4, 0);
-        ctx.lineTo(width / 4, height);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(width / 3, 0);
-        ctx.lineTo(width / 3, height);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(width / 2, 0);
-        ctx.lineTo(width / 2, height);
-        ctx.stroke();
+            ctx.strokeStyle = circleColor;
+            ctx.lineWidth = borderWidth; // Set border width
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.stroke(); // Draw the circle border
+        }
 
         const buffer = canvas.toBuffer('image/png');
-        await fs.writeFileAsync('src/images/textImageWithLines.png', buffer);
+        await fs.writeFile(`src/images/${fileName}`, buffer);
+    }
+
+    static deleteImage(fileName: string) {
+        fs.unlink(`src/images/${fileName}`, (error: any) => {
+            if (error) {
+                console.error('Error deleting the image: ', error);
+            }
+        });
+    }
+
+    static getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
     }
 }

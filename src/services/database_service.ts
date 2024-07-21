@@ -1,4 +1,6 @@
 import { Connection, createConnection } from "mysql2";
+import { Utils } from "../utils/utils";
+import { CaptchaService } from "./canvas_service";
 
 export class DatabaseService {
     private connection: Connection | null = null;
@@ -23,26 +25,39 @@ export class DatabaseService {
     }
 
 
-    private async insertCaptcha(text: string) {
+    private async insertCaptcha(): Promise<string> {
         if (!this.connection) {
-            console.error('Database connection not initialized');
-            return;
+            throw new Error('Database connection not initialized');
+        }
+
+        const captchaToken = Utils.generateToken(50);
+        const [date, captchaFileName] = Utils.generateCaptchaFileName();
+        const captchaCode = Utils.generateCaptchaText(8);
+
+        try {
+            await CaptchaService.generateImage(captchaFileName, captchaCode);
+        } catch (error) {
+            console.error('Error inserting the captcha: ', error);
+            throw error;
         }
 
         try {
             await this.connection.execute(
                 "INSERT INTO `images` (`token`, `file_name`, `time`, `code`) VALUES (?, ?, ?, ?)",
-                ['asdasd', 'slika.png', 'NOW()', text]
+                [captchaToken, captchaFileName, date, captchaCode]
             );
-            console.log('Captcha inserted successfully');
+
+            return captchaToken;
         } catch (error) {
+            CaptchaService.deleteImage(captchaFileName);
             console.error('Error inserting the captcha: ', error);
+            throw error;
         }
     }
 
     query() {
         return {
-            insertCaptcha: (text: string) => this.insertCaptcha(text),
+            insertCaptcha: () => this.insertCaptcha(),
         }
     }
 }
