@@ -1,6 +1,7 @@
-import { Connection, createConnection } from "mysql2";
+import { Connection, createConnection, FieldPacket, RowDataPacket } from "mysql2/promise";
 import { Utils } from "../utils/utils";
 import { CaptchaService } from "./canvas_service";
+import { CaptchaClientType } from "../core/types";
 
 export class DatabaseService {
     private connection: Connection | null = null;
@@ -25,7 +26,7 @@ export class DatabaseService {
     }
 
 
-    private async insertCaptcha(): Promise<string> {
+    private async insertCaptcha(): Promise<CaptchaClientType> {
         if (!this.connection) {
             throw new Error('Database connection not initialized');
         }
@@ -47,7 +48,10 @@ export class DatabaseService {
                 [captchaToken, captchaFileName, date, captchaCode]
             );
 
-            return captchaToken;
+            return {
+                token: captchaToken,
+                image: captchaFileName
+            }
         } catch (error) {
             CaptchaService.deleteImage(captchaFileName);
             console.error('Error inserting the captcha: ', error);
@@ -55,9 +59,25 @@ export class DatabaseService {
         }
     }
 
+    private async validateCaptcha(token: string, code: string): Promise<{}> {
+        try {
+            const [rows] = await this.connection?.query("SELECT * FROM `images` WHERE `token` = ? AND `code` = ?", [token, code]) as unknown as [RowDataPacket[], FieldPacket[]];
+
+            if (rows.length === 0) {
+                throw new Error('Invalid captcha');
+            }
+
+            return { status: 200, validated: true };
+        } catch (error) {
+            console.error('Error validating the captcha: ', error);
+            throw new Error('Error validating the captcha');
+        }
+    }
+
     query() {
         return {
             insertCaptcha: () => this.insertCaptcha(),
+            validateCaptcha: (token: string, code: string) => this.validateCaptcha(token, code),
         }
     }
 }

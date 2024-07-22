@@ -1,3 +1,5 @@
+import { IMAGES_PATH } from "../core/constants";
+
 const { createCanvas } = require('canvas');
 const fs = require('fs').promises;
 
@@ -83,7 +85,7 @@ export class CaptchaService {
         }
 
         const buffer = canvas.toBuffer('image/png');
-        await fs.writeFile(`src/images/${fileName}`, buffer);
+        await fs.writeFile(`${IMAGES_PATH}/${fileName}`, buffer);
     }
 
     static deleteImage(fileName: string) {
