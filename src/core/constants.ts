@@ -2,4 +2,5 @@ export const IMAGES_PATH = 'public/images';
 export const AUTH_SECURITY_TOKEN = 'example';
 export const CAPTCHA_DECODE_TOKEN = 'example';
 export const CAPTCHA_SECURITY_TOKEN = 'example';
-export const ALLOWED_ORIGINS = ['http://example1.com', 'http://example2.com'];
+export const SERVER_PORT = 3000
+export const ALLOWED_ORIGINS = ["null"];

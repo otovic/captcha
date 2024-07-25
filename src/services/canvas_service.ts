@@ -2,6 +2,7 @@ import { IMAGES_PATH } from "../core/constants";
 
 const { createCanvas } = require('canvas');
 const fs = require('fs').promises;
+const path = require('path');
 
 export class CaptchaService {
     static async generateImage(fileName: string, text: string) {
@@ -88,12 +89,13 @@ export class CaptchaService {
         await fs.writeFile(`${IMAGES_PATH}/${fileName}`, buffer);
     }
 
-    static deleteImage(fileName: string) {
-        fs.unlink(`src/images/${fileName}`, (error: any) => {
-            if (error) {
-                console.error('Error deleting the image: ', error);
-            }
-        });
+    static async deleteImage(fileName: string) {
+        const filePath = path.resolve(IMAGES_PATH, fileName);
+        try {
+            await fs.unlink(filePath);
+        } catch (error) {
+            console.log("Error deleting image");
+        }
     }
 
     static getRandomColor() {
