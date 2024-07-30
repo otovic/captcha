@@ -43,11 +43,11 @@ export const insertCaptcha = async (req: Request, res: Response) => {
     }
 }
 
-export const validateCaptcha = async (req: Request, res: Response): Promise<void> => {
+export const validateCaptcha = async (req: Request, res: Response) => {
     try {
         const { captchaToken, code } = req.body;
 
-        if (!code || !code) res.json({ status: 500, message: "Error" });
+        if (!code || !captchaToken) return res.json({ status: 500, message: "Error" });
 
         const [rows] = await connection?.query("SELECT * FROM `images` WHERE `token` = ? AND `code` = ?", [captchaToken, code]) as unknown as [RowDataPacket[], FieldPacket[]];
 
@@ -56,17 +56,16 @@ export const validateCaptcha = async (req: Request, res: Response): Promise<void
             throw new Error('Invalid captcha');
         }
 
-
         try {
             await deleteCaptcha(captchaToken);
         } catch (error) {
             console.log("Captcha validated but failed to delete image: ", error);
         }
 
-        res.json({ status: 200, validated: true });
+        return res.json({ status: 200, validated: true });
     } catch (error) {
         console.error('Error validating the captcha: ', error);
-        res.json({
+        return res.json({
             status: 500,
             validated: false
         })
@@ -75,6 +74,7 @@ export const validateCaptcha = async (req: Request, res: Response): Promise<void
 
 export const deleteCaptcha = async (token: string) => {
     try {
+        console.log("Deleting captcha with token: ", token);
         const [rows] = await connection?.query("SELECT * FROM `images` WHERE `token` = ?", [token]) as unknown as [RowDataPacket[], FieldPacket[]];
 
         if (rows.length === 0) throw new Error("invalid captcha token");
@@ -89,6 +89,6 @@ export const deleteCaptcha = async (token: string) => {
         }
     }
     catch (error) {
-        console.log("Error deleting captcha from database");
+        console.log("Error deleting captcha from database", error);
     }
 }
