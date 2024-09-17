@@ -1,22 +1,30 @@
-import { Connection, createConnection, FieldPacket, RowDataPacket } from "mysql2/promise";
+import { createPool, Pool, PoolConnection } from "mysql2/promise";
+import log from "./logger";
 
+const pool: Pool = createPool({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "captcha",
+    waitForConnections: true,
+    connectionLimit: 20,
+    queueLimit: 200
+});
 
-export let connection: Connection | null;
-
-export const initDatabase = async () => {
+export const getConnection = async (): Promise<PoolConnection> => {
     try {
-        if (connection) return connection;
-
-        connection = await createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: '',
-            database: 'captcha'
-        });
-        
-        console.log('Database connection initialized');
-        return connection;
+        return await pool.getConnection();
     } catch (error) {
-        console.error('Error connecting to the database: ', error);
+        log(`Error getting database connection: ${error}`);
+        throw new Error('Error getting database connection');
+    }
+}
+
+export const closePool = async () => {
+    try {
+        await pool.end();
+    } catch (error) {
+        log(`Error closing database pool: ${error}`);
+        throw new Error('Error closing database pool');
     }
 }

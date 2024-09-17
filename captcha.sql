@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jul 21, 2024 at 03:36 PM
--- Server version: 8.0.31
--- PHP Version: 8.0.26
+-- Generation Time: Aug 02, 2024 at 11:09 PM
+-- Server version: 5.7.36
+-- PHP Version: 7.4.26
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -29,20 +29,15 @@ SET time_zone = "+00:00";
 
 DROP TABLE IF EXISTS `images`;
 CREATE TABLE IF NOT EXISTS `images` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `token` varchar(255) NOT NULL,
   `file_name` varchar(255) NOT NULL,
-  `time` date NOT NULL,
+  `time` datetime NOT NULL,
   `code` varchar(16) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `images`
---
-
-INSERT INTO `images` (`id`, `token`, `file_name`, `time`, `code`) VALUES
-(1, 'asdasd', 'slika.png', '0000-00-00', 'ACG369CF');
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `token` (`token`),
+  UNIQUE KEY `file_name` (`file_name`)
+) ENGINE=MyISAM AUTO_INCREMENT=540 DEFAULT CHARSET=utf8;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
