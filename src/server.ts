@@ -5,7 +5,7 @@ import log from "./services/logger";
 
 setInterval(() => {
     removeUnused();
-}, 240000);
+}, 180000);
 
 app.listen(SERVER_PORT, (err?: Error) => {
     if (err) {

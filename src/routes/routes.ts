@@ -5,6 +5,6 @@ import { insertCaptcha, validateCaptcha } from "../services/captcha_service";
 const router = Router();
 
 router.get('/generateCaptcha', insertCaptcha);
-router.post('/validateCaptcha', authenticate, validateCaptcha);
+router.post('/validate_captcha', authenticate, validateCaptcha);
 
 export default router;

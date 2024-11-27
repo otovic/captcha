@@ -10,4 +10,5 @@ export const ALLOWED_ORIGINS = [
     'http://localhost:3003',
     'http://localhost:3004',
     'http://localhost:3005',
+    'http://192.168.0.106:3000',
 ];

@@ -7,7 +7,7 @@ const pool: Pool = createPool({
     password: "",
     database: "captcha",
     waitForConnections: true,
-    connectionLimit: 20,
+    connectionLimit: 400,
     queueLimit: 200
 });
 
